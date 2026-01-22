@@ -25,10 +25,10 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
   }));
 
   const renderVideoGroup = (video: VideoItem | null, index: number) => (
-    <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-      <div className="h-full border border-zinc-800/50 bg-zinc-900/20 p-4 flex flex-col xl:flex-row gap-4 hover:border-zinc-700/50 transition-colors">
+    <div className="w-full md:w-1/2 xl:w-1/3 px-12 mb-6 xl:mb-0">
+      <div className="h-full border border-zinc-800/50 bg-zinc-900/20 p-4 flex flex-col gap-4 hover:border-zinc-700/50 transition-colors">
         {/* Video Column */}
-        <div className="w-full xl:w-1/2">
+        <div className="w-full">
           {video ? (
             <div className="relative group/wrapper">
               <VideoCard
@@ -54,8 +54,8 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
         </div>
 
         {/* Feedback Column */}
-        <div className="w-full xl:w-1/2 flex flex-col h-full gap-3">
-          <div className="flex-1 flex flex-col min-h-[150px] xl:min-h-0 bg-zinc-900/30 border border-zinc-800/50 overflow-hidden p-1 transition-colors focus-within:border-emerald-500/50 focus-within:bg-zinc-900/50 focus-within:ring-1 focus-within:ring-emerald-500/20">
+        <div className="w-full flex flex-col gap-3 flex-1">
+          <div className="flex-1 flex flex-col min-h-[150px] bg-zinc-900/30 border border-zinc-800/50 overflow-hidden p-1 transition-colors focus-within:border-emerald-500/50 focus-within:bg-zinc-900/50 focus-within:ring-1 focus-within:ring-emerald-500/20">
             <textarea
               value={video?.feedback || ''}
               onChange={(e) => video && onFeedbackChange(video.id, e.target.value)}
@@ -90,21 +90,17 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
   );
 
   return (
-    <div className="flex flex-col gap-6 pb-20">
+    <div className="flex flex-col gap-6 pb-20 scale-80 origin-top">
       {/* Row 1 */}
-      <div className="flex flex-wrap -mx-3">
+      <div className="flex flex-wrap -mx-12 gap-y-6">
         {renderVideoGroup(videoSlots[0].video, 1)}
         {renderVideoGroup(videoSlots[1].video, 2)}
+        {renderVideoGroup(videoSlots[2].video, 3)}
       </div>
 
       {/* Row 2 */}
-      <div className="flex flex-wrap -mx-3">
-        {renderVideoGroup(videoSlots[2].video, 3)}
+      <div className="flex flex-wrap -mx-12 gap-y-6">
         {renderVideoGroup(videoSlots[3].video, 4)}
-      </div>
-
-      {/* Row 3 */}
-      <div className="flex flex-wrap -mx-3">
         {renderVideoGroup(videoSlots[4].video, 5)}
         {renderVideoGroup(videoSlots[5].video, 6)}
       </div>

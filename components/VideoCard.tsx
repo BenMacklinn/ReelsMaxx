@@ -63,7 +63,7 @@ export default function VideoCard({ fileId, originalUrl, index, caption, onCapti
               ref={videoRef}
               src={videoUrl}
               className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
-              preload="metadata"
+              preload="auto"
               muted
               playsInline
               onLoadedMetadata={handleLoadedMetadata}

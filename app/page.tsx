@@ -24,6 +24,7 @@ export default function Home() {
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [inputLinks, setInputLinks] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   // Generate last 7 days
@@ -179,54 +180,68 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="text-sm font-bold text-zinc-500 uppercase tracking-wide">
-            {videos.length} Videos
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => setShowImport(!showImport)}
+              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors border ${
+                showImport 
+                  ? 'bg-emerald-500 text-black border-emerald-500' 
+                  : 'bg-transparent text-zinc-400 border-zinc-800 hover:border-zinc-600 hover:text-white'
+              }`}
+            >
+              {showImport ? 'Close Import' : 'Import Videos'}
+            </button>
+            <div className="text-sm font-bold text-zinc-500 uppercase tracking-wide">
+              {videos.length} Videos
+            </div>
           </div>
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="p-4 md:p-8 max-w-[1600px] mx-auto w-full">
-        <header className="mb-12">
-          <div className="bg-zinc-900/50 p-6 border border-zinc-800/50 backdrop-blur-sm hover:border-emerald-500/20 transition-colors">
-            <div className="flex justify-between items-end mb-4">
-              <label 
-                htmlFor="video-links" 
-                className="text-sm font-bold text-emerald-500 uppercase tracking-wide"
-              >
-                Add Video Links
-              </label>
-              <span className="text-xs text-zinc-500">
-                Supports Google Drive Links
-              </span>
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                id="video-links"
-                value={inputLinks}
-                onChange={(e) => setInputLinks(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleAddVideos();
-                  }
-                }}
-                className="w-full h-14 pl-4 pr-40 bg-zinc-950/50 border border-zinc-800 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none text-sm text-zinc-200 placeholder-zinc-600 transition-all"
-                placeholder="Paste Google Drive link here..."
-              />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                <button
-                  onClick={handleAddVideos}
-                  disabled={!inputLinks.trim()}
-                  className="px-4 md:px-6 py-2 bg-emerald-500 text-black text-sm font-bold hover:bg-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide"
+      {showImport && (
+        <div className="max-w-[1600px] mx-auto w-full px-4 md:px-8 sticky top-20 z-40 bg-zinc-950 pt-8 pb-4 border-b border-transparent transition-all">
+          <div className="bg-zinc-900/50 p-6 border border-zinc-800/50 backdrop-blur-sm hover:border-emerald-500/20 transition-colors shadow-2xl">
+              <div className="flex justify-between items-end mb-4">
+                <label 
+                  htmlFor="video-links" 
+                  className="text-sm font-bold text-emerald-500 uppercase tracking-wide"
                 >
-                  Import
-                </button>
+                  Add Video Links
+                </label>
+                <span className="text-xs text-zinc-500">
+                  Supports Google Drive Links
+                </span>
+              </div>
+              <div className="relative">
+                <input
+                  type="text"
+                  id="video-links"
+                  value={inputLinks}
+                  onChange={(e) => setInputLinks(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleAddVideos();
+                    }
+                  }}
+                  className="w-full h-14 pl-4 pr-40 bg-zinc-950/50 border border-zinc-800 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none text-sm text-zinc-200 placeholder-zinc-600 transition-all"
+                  placeholder="Paste Google Drive link here..."
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                  <button
+                    onClick={handleAddVideos}
+                    disabled={!inputLinks.trim()}
+                    className="px-4 md:px-6 py-2 bg-emerald-500 text-black text-sm font-bold hover:bg-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide"
+                  >
+                    Import
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </header>
+        </div>
+      )}
 
+      {/* Main Content */}
+      <main className="p-4 md:p-8 max-w-[1600px] mx-auto w-full">
         <section>
           {isPending ? (
             <div className="text-zinc-500 text-center py-20 font-bold uppercase tracking-wider">Loading...</div>
