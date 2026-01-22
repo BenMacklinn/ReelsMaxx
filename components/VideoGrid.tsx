@@ -90,7 +90,7 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
   );
 
   return (
-    <div className="flex flex-col gap-18 pb-20 scale-80 origin-top">
+    <div className="flex flex-col gap-18 -mb-96 scale-80 origin-top pb-0">
       {/* Row 1 */}
       <div className="flex flex-wrap -mx-12 gap-y-12">
         {renderVideoGroup(videoSlots[0].video, 1)}

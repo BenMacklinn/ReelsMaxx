@@ -9,7 +9,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "ReelsMaxx | Professional Video Review Tool",
+  title: "ReelsMaxx",
   description: "Professional video review and captioning dashboard for short-form content",
 };
 
