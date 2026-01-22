@@ -18,8 +18,8 @@ interface VideoGridProps {
 }
 
 export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, onStatusChange, onRemoveVideo }: VideoGridProps) {
-  // Get first 4 videos or create placeholders
-  const videoSlots = [0, 1, 2, 3].map(i => ({
+  // Get first 6 videos or create placeholders
+  const videoSlots = [0, 1, 2, 3, 4, 5].map(i => ({
     video: videos[i] || null,
     index: i + 1
   }));
@@ -95,6 +95,18 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
       <div className="flex flex-wrap -mx-3">
         {renderVideoGroup(videoSlots[0].video, 1)}
         {renderVideoGroup(videoSlots[1].video, 2)}
+      </div>
+
+      {/* Row 2 */}
+      <div className="flex flex-wrap -mx-3">
+        {renderVideoGroup(videoSlots[2].video, 3)}
+        {renderVideoGroup(videoSlots[3].video, 4)}
+      </div>
+
+      {/* Row 3 */}
+      <div className="flex flex-wrap -mx-3">
+        {renderVideoGroup(videoSlots[4].video, 5)}
+        {renderVideoGroup(videoSlots[5].video, 6)}
       </div>
     </div>
   );
