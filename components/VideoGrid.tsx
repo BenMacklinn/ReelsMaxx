@@ -90,16 +90,16 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
   );
 
   return (
-    <div className="flex flex-col gap-6 pb-20 scale-80 origin-top">
+    <div className="flex flex-col gap-18 pb-20 scale-80 origin-top">
       {/* Row 1 */}
-      <div className="flex flex-wrap -mx-12 gap-y-6">
+      <div className="flex flex-wrap -mx-12 gap-y-12">
         {renderVideoGroup(videoSlots[0].video, 1)}
         {renderVideoGroup(videoSlots[1].video, 2)}
         {renderVideoGroup(videoSlots[2].video, 3)}
       </div>
 
       {/* Row 2 */}
-      <div className="flex flex-wrap -mx-12 gap-y-6">
+      <div className="flex flex-wrap -mx-12 gap-y-12">
         {renderVideoGroup(videoSlots[3].video, 4)}
         {renderVideoGroup(videoSlots[4].video, 5)}
         {renderVideoGroup(videoSlots[5].video, 6)}
