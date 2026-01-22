@@ -136,21 +136,21 @@ export default function Home() {
     <div className="min-h-screen bg-zinc-950 overflow-hidden">
       {/* Top Navbar */}
       <nav className="border-b border-zinc-800 bg-zinc-950/95 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-8 h-20 flex items-center justify-between relative">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-4 md:py-0 md:h-20 flex flex-col md:flex-row items-center justify-between relative gap-4 md:gap-0">
           
           {/* Left: Branding & Date Dropdown */}
-          <div className="flex items-center gap-12 z-10">
+          <div className="flex items-center justify-between w-full md:w-auto md:justify-start gap-4 md:gap-12 z-10">
             <div>
-              <h1 className="text-2xl font-black tracking-tight text-white uppercase mb-1">ReelsMaxx</h1>
+              <h1 className="text-xl md:text-2xl font-black tracking-tight text-white uppercase mb-1">ReelsMaxx</h1>
               <div className="h-1 w-12 bg-emerald-500"></div>
             </div>
 
             <div className="relative">
               <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center gap-3 px-4 py-2 hover:bg-zinc-900 transition-colors border border-transparent hover:border-zinc-800"
+              className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 hover:bg-zinc-900 transition-colors border border-transparent hover:border-zinc-800 rounded-md md:rounded-none"
             >
-              <span className="text-xl font-bold text-white uppercase">{days.find(d => d.key === selectedDateKey)?.label}</span>
+              <span className="text-lg md:text-xl font-bold text-white uppercase">{days.find(d => d.key === selectedDateKey)?.label}</span>
               <span className={`text-zinc-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}>▼</span>
             </button>
 
@@ -160,7 +160,7 @@ export default function Home() {
                   className="fixed inset-0 z-40" 
                   onClick={() => setIsDropdownOpen(false)}
                 />
-                <div className="absolute top-full left-0 mt-2 w-48 bg-zinc-900 border border-zinc-800 shadow-xl z-50 py-2">
+                <div className="absolute top-full right-0 md:left-0 mt-2 w-48 bg-zinc-900 border border-zinc-800 shadow-xl z-50 py-2">
                   {days.map((day) => (
                     <button
                       key={day.key}
@@ -183,7 +183,7 @@ export default function Home() {
           </div>
 
           {/* Center: Logo */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-4">
+          <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-4">
             <Image 
               src="/logo.png" 
               alt="ReelsMaxx Logo" 
@@ -194,26 +194,26 @@ export default function Home() {
           </div>
 
           {/* Right: Actions */}
-          <div className="flex items-center gap-6 z-10">
+          <div className="flex items-center justify-between w-full md:w-auto md:justify-start gap-4 md:gap-6 z-10">
+            <div className="text-sm font-bold text-zinc-500 uppercase tracking-wide order-1 md:order-none">
+              {videos.length} Videos
+            </div>
             <button
               onClick={() => setShowImport(!showImport)}
-              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors border ${
+              className={`flex-1 md:flex-none order-2 md:order-none px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors border ${
                 showImport 
                   ? 'bg-emerald-500 text-black border-emerald-500' 
                   : 'bg-transparent text-zinc-400 border-zinc-800 hover:border-zinc-600 hover:text-white'
               }`}
             >
-              {showImport ? 'Close Import' : 'Import Videos'}
+              {showImport ? 'Close' : 'Import Videos'}
             </button>
-            <div className="text-sm font-bold text-zinc-500 uppercase tracking-wide">
-              {videos.length} Videos
-            </div>
           </div>
         </div>
       </nav>
 
       {showImport && (
-        <div className="max-w-[1600px] mx-auto w-full px-4 md:px-8 sticky top-20 z-40 bg-zinc-950 pt-8 pb-4 border-b border-transparent transition-all">
+        <div className="max-w-[1600px] mx-auto w-full px-4 md:px-8 sticky top-32 md:top-20 z-40 bg-zinc-950 pt-4 md:pt-8 pb-4 border-b border-transparent transition-all">
           <div className="bg-zinc-900/50 p-6 border border-zinc-800/50 backdrop-blur-sm hover:border-emerald-500/20 transition-colors shadow-2xl">
               <div className="flex justify-between items-end mb-4">
                 <label 
