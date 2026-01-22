@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import VideoGrid, { VideoItem } from '@/components/VideoGrid';
 import { extractFileId } from '@/utils/drive';
+import { getVideos, addVideo, updateVideo, deleteVideo } from './actions';
 
 // Helper to format date "Jan 22"
 const formatDate = (date: Date) => {
@@ -20,9 +21,10 @@ const getDateKey = (date: Date) => {
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [selectedDateKey, setSelectedDateKey] = useState<string>('');
-  const [videosByDate, setVideosByDate] = useState<Record<string, VideoItem[]>>({});
+  const [videos, setVideos] = useState<VideoItem[]>([]);
   const [inputLinks, setInputLinks] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   // Generate last 7 days
   const [days, setDays] = useState<{ date: Date; key: string; label: string }[]>([]);
@@ -60,33 +62,17 @@ export default function Home() {
     if (tempDays.length > 0) {
       setSelectedDateKey(tempDays[0].key);
     }
-
-    // Load from local storage
-    const saved = localStorage.getItem('reelsmaxx_data');
-    if (saved) {
-      try {
-        setVideosByDate(JSON.parse(saved));
-      } catch (e) {
-        console.error('Failed to load data', e);
-      }
-    }
   }, []);
 
-  // Save to local storage whenever data changes
+  // Fetch videos when selected date changes
   useEffect(() => {
-    if (mounted && Object.keys(videosByDate).length > 0) {
-      localStorage.setItem('reelsmaxx_data', JSON.stringify(videosByDate));
+    if (selectedDateKey) {
+      startTransition(async () => {
+        const fetchedVideos = await getVideos(selectedDateKey);
+        setVideos(fetchedVideos);
+      });
     }
-  }, [videosByDate, mounted]);
-
-  const currentVideos = videosByDate[selectedDateKey] || [];
-
-  const updateVideosForDate = (newVideos: VideoItem[]) => {
-    setVideosByDate(prev => ({
-      ...prev,
-      [selectedDateKey]: newVideos
-    }));
-  };
+  }, [selectedDateKey]);
 
   const handleAddVideos = () => {
     if (!inputLinks.trim()) return;
@@ -111,28 +97,35 @@ export default function Home() {
       }
     });
 
-    updateVideosForDate([...currentVideos, ...newVideos]);
+    // Optimistically update UI
+    setVideos(prev => [...prev, ...newVideos]);
+    
+    // Save to DB
+    newVideos.forEach(v => {
+      addVideo(selectedDateKey, v);
+    });
+    
     setInputLinks('');
   };
 
   const handleCaptionChange = (id: string, newCaption: string) => {
-    const updated = currentVideos.map((v) => (v.id === id ? { ...v, caption: newCaption } : v));
-    updateVideosForDate(updated);
+    setVideos(prev => prev.map((v) => (v.id === id ? { ...v, caption: newCaption } : v)));
+    updateVideo(id, { caption: newCaption });
   };
 
   const handleFeedbackChange = (id: string, newFeedback: string) => {
-    const updated = currentVideos.map((v) => (v.id === id ? { ...v, feedback: newFeedback } : v));
-    updateVideosForDate(updated);
+    setVideos(prev => prev.map((v) => (v.id === id ? { ...v, feedback: newFeedback } : v)));
+    updateVideo(id, { feedback: newFeedback });
   };
 
   const handleStatusChange = (id: string, newStatus: 'pending' | 'approved' | 'rejected') => {
-    const updated = currentVideos.map((v) => (v.id === id ? { ...v, status: newStatus } : v));
-    updateVideosForDate(updated);
+    setVideos(prev => prev.map((v) => (v.id === id ? { ...v, status: newStatus } : v)));
+    updateVideo(id, { status: newStatus });
   };
 
   const handleRemoveVideo = (id: string) => {
-    const updated = currentVideos.filter((v) => v.id !== id);
-    updateVideosForDate(updated);
+    setVideos(prev => prev.filter((v) => v.id !== id));
+    deleteVideo(id);
   };
 
   if (!mounted) return null;
@@ -187,7 +180,7 @@ export default function Home() {
           </div>
 
           <div className="text-sm font-bold text-zinc-500 uppercase tracking-wide">
-            {currentVideos.length} Videos
+            {videos.length} Videos
           </div>
         </div>
       </nav>
@@ -235,13 +228,17 @@ export default function Home() {
         </header>
 
         <section>
-          <VideoGrid 
-            videos={currentVideos} 
-            onCaptionChange={handleCaptionChange} 
-            onFeedbackChange={handleFeedbackChange}
-            onStatusChange={handleStatusChange}
-            onRemoveVideo={handleRemoveVideo}
-          />
+          {isPending ? (
+            <div className="text-zinc-500 text-center py-20 font-bold uppercase tracking-wider">Loading...</div>
+          ) : (
+            <VideoGrid 
+              videos={videos} 
+              onCaptionChange={handleCaptionChange} 
+              onFeedbackChange={handleFeedbackChange}
+              onStatusChange={handleStatusChange}
+              onRemoveVideo={handleRemoveVideo}
+            />
+          )}
         </section>
       </main>
     </div>
