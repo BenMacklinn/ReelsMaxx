@@ -134,8 +134,8 @@ export default function Home() {
     <div className="min-h-screen bg-zinc-950">
       {/* Top Navbar */}
       <nav className="border-b border-zinc-800 bg-zinc-950/95 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-[1600px] mx-auto px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-12">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-4 md:gap-12">
             <div>
               <h1 className="text-2xl font-black tracking-tight text-white uppercase mb-1">ReelsMaxx</h1>
               <div className="h-1 w-12 bg-emerald-500"></div>
@@ -186,7 +186,7 @@ export default function Home() {
       </nav>
 
       {/* Main Content */}
-      <main className="p-8 max-w-[1600px] mx-auto w-full">
+      <main className="p-4 md:p-8 max-w-[1600px] mx-auto w-full">
         <header className="mb-12">
           <div className="bg-zinc-900/50 p-6 border border-zinc-800/50 backdrop-blur-sm hover:border-emerald-500/20 transition-colors">
             <div className="flex justify-between items-end mb-4">
@@ -218,7 +218,7 @@ export default function Home() {
                 <button
                   onClick={handleAddVideos}
                   disabled={!inputLinks.trim()}
-                  className="px-6 py-2 bg-emerald-500 text-black text-sm font-bold hover:bg-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide"
+                  className="px-4 md:px-6 py-2 bg-emerald-500 text-black text-sm font-bold hover:bg-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide"
                 >
                   Import
                 </button>
