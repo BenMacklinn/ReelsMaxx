@@ -4,6 +4,8 @@ import { supabase } from '@/utils/supabase';
 import { VideoItem } from '@/components/VideoGrid';
 
 export async function getVideos(dateKey: string): Promise<VideoItem[]> {
+  console.log(`Fetching videos for date: ${dateKey}`);
+  
   const { data, error } = await supabase
     .from('videos')
     .select('*')
@@ -15,13 +17,8 @@ export async function getVideos(dateKey: string): Promise<VideoItem[]> {
     return [];
   }
 
-  // Map DB fields to camelCase if necessary, assuming DB columns are snake_case
-  // But to keep it simple, I'll assume we create the table with mixed case or handle mapping here.
-  // Let's stick to camelCase in DB or map it.
-  // Actually, Supabase returns what is in the DB.
-  // Let's assume the user creates columns matching the JSON properties or we map them.
-  // Mapping is safer.
-  
+  console.log(`Found ${data?.length || 0} videos for ${dateKey}`);
+
   return data.map((row: any) => ({
     id: row.id,
     fileId: row.file_id,
@@ -33,23 +30,30 @@ export async function getVideos(dateKey: string): Promise<VideoItem[]> {
 }
 
 export async function addVideo(dateKey: string, video: VideoItem) {
-  const { error } = await supabase
+  console.log(`Adding video to ${dateKey}:`, video.id);
+
+  const payload = {
+    id: video.id,
+    date_key: dateKey,
+    file_id: video.fileId,
+    original_url: video.originalUrl,
+    caption: video.caption,
+    feedback: video.feedback,
+    status: video.status,
+    created_at: new Date().toISOString(),
+  };
+
+  const { data, error } = await supabase
     .from('videos')
-    .insert({
-      id: video.id,
-      date_key: dateKey,
-      file_id: video.fileId,
-      original_url: video.originalUrl,
-      caption: video.caption,
-      feedback: video.feedback,
-      status: video.status,
-      created_at: new Date().toISOString(),
-    });
+    .insert(payload)
+    .select();
 
   if (error) {
-    console.error('Error adding video:', error);
-    throw new Error('Failed to add video');
+    console.error('SERVER ERROR adding video:', JSON.stringify(error, null, 2));
+    throw new Error(`Failed to add video: ${error.message}`);
   }
+  
+  console.log('Successfully added video:', data);
 }
 
 export async function updateVideo(id: string, updates: Partial<VideoItem>) {

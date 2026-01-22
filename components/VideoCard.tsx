@@ -41,12 +41,21 @@ export default function VideoCard({ fileId, originalUrl, index, caption, onCapti
     <div className="flex flex-col gap-3 w-full group">
       {/* Video Container - Sharp edges, 9:16 aspect ratio */}
       <div className="aspect-[9/16] bg-black relative w-full overflow-hidden border border-zinc-800 group-hover:border-emerald-500/40 transition-colors">
+        {/*
+          Google Drive videos are notoriously hard to embed directly in <video> tags due to CORS and expirable links.
+          The most reliable way to show a "thumbnail" or preview is usually the iframe with /preview endpoint.
+          However, that often has UI chrome.
+          
+          If direct <video> fails (which it often does for Drive), we fall back to iframe.
+          But even iframes can be blocked by CSP if the drive link is restricted.
+        */}
         {error ? (
           <iframe
             src={`https://drive.google.com/file/d/${fileId}/preview`}
             className="w-[120%] h-full border-0 -ml-[10%] scale-102"
             allow="autoplay"
             title="Video Preview"
+            sandbox="allow-scripts allow-same-origin allow-presentation"
           />
         ) : (
           <>
