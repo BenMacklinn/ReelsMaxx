@@ -6,14 +6,14 @@ export interface VideoItem {
   originalUrl: string;
   caption: string;
   feedback: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'posted';
 }
 
 interface VideoGridProps {
   videos: VideoItem[];
   onCaptionChange: (id: string, newCaption: string) => void;
   onFeedbackChange: (id: string, newFeedback: string) => void;
-  onStatusChange: (id: string, newStatus: 'pending' | 'approved' | 'rejected') => void;
+  onStatusChange: (id: string, newStatus: 'pending' | 'approved' | 'rejected' | 'posted') => void;
   onRemoveVideo: (id: string) => void;
 }
 
@@ -24,9 +24,25 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
     index: i + 1
   }));
 
-  const renderVideoGroup = (video: VideoItem | null, index: number) => (
+  const renderVideoGroup = (video: VideoItem | null, index: number) => {
+    const isApproved = video?.status === 'approved' || video?.status === 'posted';
+    const isPosted = video?.status === 'posted';
+
+    return (
     <div className="w-full md:w-1/2 xl:w-1/3 px-12 mb-6 xl:mb-0">
-      <div className="h-full border border-zinc-800/50 bg-zinc-900/20 p-4 flex flex-col gap-4 hover:border-zinc-700/50 transition-colors">
+      <div className="h-full border border-zinc-800 bg-zinc-900/20 p-4 flex flex-col gap-4 hover:border-zinc-700 transition-colors relative">
+        {/* Blur Overlay for Posted Status (Whole Card) */}
+        {isPosted && (
+          <div className="absolute inset-0 backdrop-blur-md bg-zinc-900/10 z-30 flex items-center justify-center">
+            <button
+              onClick={() => onStatusChange(video!.id, 'approved')} // Revert to approved to "reveal"
+              className="px-6 py-2 bg-zinc-950/80 border border-zinc-500 text-white font-bold uppercase tracking-widest hover:bg-white hover:text-black hover:border-white transition-all pointer-events-auto"
+            >
+              Reveal
+            </button>
+          </div>
+        )}
+
         {/* Video Column */}
         <div className="w-full">
           {video ? (
@@ -36,18 +52,19 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
                 originalUrl={video.originalUrl}
                 caption={video.caption}
                 index={index}
-                onCaptionChange={(val) => onCaptionChange(video.id, val)} 
+                onCaptionChange={(val) => onCaptionChange(video.id, val)}
+                status={video.status}
               />
               <button
                 onClick={() => onRemoveVideo(video.id)}
-                className="absolute -top-3 -right-3 w-7 h-7 bg-zinc-900 border border-red-500/50 flex items-center justify-center text-red-500 hover:text-red-400 hover:border-red-400 hover:bg-zinc-800 transition-all z-20 shadow-lg"
+                className="absolute -top-3 -right-3 w-7 h-7 bg-zinc-900 border border-white/50 flex items-center justify-center text-red-500 hover:text-red-400 hover:border-red-400 hover:bg-zinc-800 transition-all z-20 shadow-lg"
                 title="Remove video"
               >
                 ✕
               </button>
             </div>
           ) : (
-            <div className="aspect-[9/16] w-full bg-zinc-900/20 border border-zinc-800/50 flex flex-col items-center justify-center">
+            <div className="aspect-[9/16] w-full bg-zinc-900/20 border border-zinc-800 flex flex-col items-center justify-center">
               <span className="text-white font-medium">Slot {index}</span>
             </div>
           )}
@@ -55,7 +72,7 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
 
         {/* Feedback Column */}
         <div className="w-full flex flex-col gap-3 flex-1">
-          <div className="flex-1 flex flex-col min-h-[150px] bg-zinc-900/30 border border-zinc-800/50 overflow-hidden p-1 transition-colors focus-within:border-emerald-500/50 focus-within:bg-zinc-900/50 focus-within:ring-1 focus-within:ring-emerald-500/20">
+          <div className="flex-1 flex flex-col min-h-[150px] bg-zinc-900/30 border border-zinc-800 overflow-hidden p-1 transition-colors focus-within:border-emerald-500/50 focus-within:bg-zinc-900/50 focus-within:ring-1 focus-within:ring-emerald-500/20">
             <textarea
               value={video?.feedback || ''}
               onChange={(e) => video && onFeedbackChange(video.id, e.target.value)}
@@ -64,17 +81,17 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
               placeholder={video ? "Enter feedback..." : ""}
             />
           </div>
-          <div className="h-10 flex shrink-0">
+          <div className="flex flex-col gap-2 shrink-0">
             <button
               disabled={!video}
-              onClick={() => video && onStatusChange(video.id, video.status === 'approved' ? 'pending' : 'approved')}
-              className={`w-full font-medium text-sm transition-all flex items-center justify-center gap-2 border h-full
-                ${video?.status === 'approved' 
+              onClick={() => video && onStatusChange(video.id, isApproved ? 'pending' : 'approved')}
+              className={`w-full font-medium text-sm transition-all flex items-center justify-center gap-2 border h-10 relative z-20
+                ${isApproved 
                   ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
                   : 'bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:border-zinc-700 hover:text-zinc-400 disabled:opacity-50 disabled:hover:border-zinc-800 disabled:hover:text-zinc-500'
                 }`}
             >
-              {video?.status === 'approved' ? (
+              {isApproved ? (
                 <>
                   <span className="text-lg">✓</span>
                   APPROVED
@@ -83,11 +100,30 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
                 "APPROVE"
               )}
             </button>
+            <button
+              disabled={!video}
+              onClick={() => video && onStatusChange(video.id, isPosted ? 'approved' : 'posted')}
+              className={`w-full font-medium text-sm transition-all flex items-center justify-center gap-2 border h-10 relative z-20
+                ${isPosted 
+                  ? 'bg-red-600 text-white border-red-500 shadow-[0_0_15px_rgba(220,38,38,0.3)]' 
+                  : 'bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:border-zinc-700 hover:text-zinc-400 disabled:opacity-50 disabled:hover:border-zinc-800 disabled:hover:text-zinc-500'
+                }`}
+            >
+              {isPosted ? (
+                <>
+                  <span className="text-lg">✓</span>
+                  POSTED
+                </>
+              ) : (
+                "POSTED"
+              )}
+            </button>
           </div>
         </div>
       </div>
     </div>
   );
+  };
 
   return (
     <div className="flex flex-col gap-18 -mb-96 scale-80 origin-top pb-0">

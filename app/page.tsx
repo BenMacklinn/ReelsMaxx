@@ -4,12 +4,7 @@ import { useState, useEffect, useTransition } from 'react';
 import Image from 'next/image';
 import VideoGrid, { VideoItem } from '@/components/VideoGrid';
 import { extractFileId } from '@/utils/drive';
-import { getVideos, addVideo, updateVideo, deleteVideo } from './actions';
-
-// Helper to format date "Jan 22"
-const formatDate = (date: Date) => {
-  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(date);
-};
+import { getVideosPaginated, addVideo, updateVideo, deleteVideo } from './actions';
 
 // Helper to get date key "2026-01-22"
 const getDateKey = (date: Date) => {
@@ -21,66 +16,60 @@ const getDateKey = (date: Date) => {
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
-  const [selectedDateKey, setSelectedDateKey] = useState<string>('');
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [inputLinks, setInputLinks] = useState('');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [isPending, startTransition] = useTransition();
-
-  // Generate last 7 days
-  const [days, setDays] = useState<{ date: Date; key: string; label: string }[]>([]);
+  const [isLoadingMore, startLoadMoreTransition] = useTransition();
+  
+  // Pagination state
+  const LIMIT = 6;
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     setMounted(true);
-    
-    // Initialize dates
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    // Start from Jan 19, 2026
-    const startDate = new Date(2026, 0, 19); // Jan 19, 2026
-    
-    const tempDays = [];
-    let current = new Date(startDate);
-    
-    // Generate weekdays from Jan 19 up to today
-    while (current <= today) {
-      const dayOfWeek = current.getDay();
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Skip Sunday(0) and Saturday(6)
-        tempDays.push({
-          date: new Date(current),
-          key: getDateKey(current),
-          label: formatDate(current),
-        });
-      }
-      current.setDate(current.getDate() + 1);
-    }
-    
-    // Show newest first
-    tempDays.reverse();
-    
-    setDays(tempDays);
-    if (tempDays.length > 0) {
-      setSelectedDateKey(tempDays[0].key);
-    }
+    // Initial load
+    loadMoreVideos(0);
   }, []);
 
-  // Fetch videos when selected date changes
-  useEffect(() => {
-    if (selectedDateKey) {
-      startTransition(async () => {
-        const fetchedVideos = await getVideos(selectedDateKey);
+  const loadMoreVideos = (currentOffset: number) => {
+    startTransition(async () => {
+      const fetchedVideos = await getVideosPaginated(currentOffset, LIMIT);
+      
+      if (fetchedVideos.length < LIMIT) {
+        setHasMore(false);
+      }
+
+      if (currentOffset === 0) {
         setVideos(fetchedVideos);
-      });
-    }
-  }, [selectedDateKey]);
+      } else {
+        setVideos(prev => [...prev, ...fetchedVideos]);
+      }
+      
+      setOffset(currentOffset + LIMIT);
+    });
+  };
+
+  const handleLoadMore = () => {
+    startLoadMoreTransition(async () => {
+      const fetchedVideos = await getVideosPaginated(offset, LIMIT);
+      
+      if (fetchedVideos.length < LIMIT) {
+        setHasMore(false);
+      }
+
+      setVideos(prev => [...prev, ...fetchedVideos]);
+      setOffset(prev => prev + LIMIT);
+    });
+  };
 
   const handleAddVideos = () => {
     if (!inputLinks.trim()) return;
 
     const lines = inputLinks.split(/\n+/);
     const newVideos: VideoItem[] = [];
+    const todayKey = getDateKey(new Date());
 
     lines.forEach((line) => {
       const url = line.trim();
@@ -99,12 +88,12 @@ export default function Home() {
       }
     });
 
-    // Optimistically update UI
-    setVideos(prev => [...prev, ...newVideos]);
+    // Optimistically update UI - add to top
+    setVideos(prev => [...newVideos, ...prev]);
     
     // Save to DB
     newVideos.forEach(v => {
-      addVideo(selectedDateKey, v);
+      addVideo(todayKey, v);
     });
     
     setInputLinks('');
@@ -120,7 +109,7 @@ export default function Home() {
     updateVideo(id, { feedback: newFeedback });
   };
 
-  const handleStatusChange = (id: string, newStatus: 'pending' | 'approved' | 'rejected') => {
+  const handleStatusChange = (id: string, newStatus: 'pending' | 'approved' | 'rejected' | 'posted') => {
     setVideos(prev => prev.map((v) => (v.id === id ? { ...v, status: newStatus } : v)));
     updateVideo(id, { status: newStatus });
   };
@@ -138,47 +127,11 @@ export default function Home() {
       <nav className="border-b border-zinc-800 bg-zinc-950/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-4 md:py-0 md:h-20 flex flex-col md:flex-row items-center justify-between relative gap-4 md:gap-0">
           
-          {/* Left: Branding & Date Dropdown */}
-          <div className="flex items-center justify-between w-full md:w-auto md:justify-start gap-4 md:gap-12 z-10">
+          {/* Left: Branding */}
+          <div className="flex items-center justify-between w-full md:w-auto md:justify-start gap-4 md:gap-12 z-20">
             <div>
               <h1 className="text-xl md:text-2xl font-black tracking-tight text-white uppercase mb-1">ReelsMaxx</h1>
               <div className="h-1 w-12 bg-emerald-500"></div>
-            </div>
-
-            <div className="relative">
-              <button 
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 hover:bg-zinc-900 transition-colors border border-transparent hover:border-zinc-800 rounded-md md:rounded-none"
-            >
-              <span className="text-lg md:text-xl font-bold text-white uppercase">{days.find(d => d.key === selectedDateKey)?.label}</span>
-              <span className={`text-zinc-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}>▼</span>
-            </button>
-
-            {isDropdownOpen && (
-              <>
-                <div 
-                  className="fixed inset-0 z-40" 
-                  onClick={() => setIsDropdownOpen(false)}
-                />
-                <div className="absolute top-full right-0 md:left-0 mt-2 w-48 bg-zinc-900 border border-zinc-800 shadow-xl z-50 py-2">
-                  {days.map((day) => (
-                    <button
-                      key={day.key}
-                      onClick={() => {
-                        setSelectedDateKey(day.key);
-                        setIsDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-3 text-sm font-bold uppercase tracking-wide hover:bg-zinc-800 transition-colors flex items-center justify-between ${
-                        selectedDateKey === day.key ? 'text-emerald-500' : 'text-zinc-400'
-                      }`}
-                    >
-                      {day.label}
-                      {selectedDateKey === day.key && <span>✓</span>}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
             </div>
           </div>
 
@@ -196,7 +149,7 @@ export default function Home() {
           {/* Right: Actions */}
           <div className="flex items-center justify-between w-full md:w-auto md:justify-start gap-4 md:gap-6 z-10">
             <div className="text-sm font-bold text-zinc-500 uppercase tracking-wide order-1 md:order-none">
-              {videos.length} Videos
+              {videos.length} Videos Loaded
             </div>
             <button
               onClick={() => setShowImport(!showImport)}
@@ -255,11 +208,8 @@ export default function Home() {
       )}
 
       {/* Main Content */}
-      <main className="p-4 md:p-8 max-w-[1600px] mx-auto w-full pb-0 mb-0">
-        <section className="mb-0 pb-0">
-          {isPending ? (
-            <div className="text-zinc-500 text-center py-20 font-bold uppercase tracking-wider">Loading...</div>
-          ) : (
+      <main className="p-4 md:p-8 max-w-[1600px] mx-auto w-full pb-20">
+        <section className="mb-8">
             <VideoGrid 
               videos={videos} 
               onCaptionChange={handleCaptionChange} 
@@ -267,8 +217,20 @@ export default function Home() {
               onStatusChange={handleStatusChange}
               onRemoveVideo={handleRemoveVideo}
             />
-          )}
         </section>
+
+        {/* Load More Button */}
+        {hasMore && (
+          <div className="flex justify-center pb-20">
+            <button
+              onClick={handleLoadMore}
+              disabled={isLoadingMore || isPending}
+              className="px-8 py-4 bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold uppercase tracking-widest hover:bg-zinc-800 hover:text-white hover:border-zinc-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoadingMore ? 'Loading...' : 'Load More Videos'}
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );

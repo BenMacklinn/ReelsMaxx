@@ -9,9 +9,10 @@ interface VideoCardProps {
   index: number;
   caption: string;
   onCaptionChange: (newCaption: string) => void;
+  status?: string;
 }
 
-export default function VideoCard({ fileId, originalUrl, index, caption, onCaptionChange }: VideoCardProps) {
+export default function VideoCard({ fileId, originalUrl, index, caption, onCaptionChange, status }: VideoCardProps) {
   const [error, setError] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -38,9 +39,9 @@ export default function VideoCard({ fileId, originalUrl, index, caption, onCapti
   };
 
   return (
-    <div className="flex flex-col gap-3 w-full group">
+    <div className="flex flex-col gap-3 w-full group relative">
       {/* Video Container - Sharp edges, 9:16 aspect ratio */}
-      <div className="aspect-[9/16] bg-black relative w-full overflow-hidden border border-zinc-800 group-hover:border-emerald-500/40 transition-colors">
+      <div className="aspect-[9/16] bg-black relative w-full overflow-hidden border border-zinc-800 group-hover:border-zinc-700 transition-colors">
         {/*
           Google Drive videos are notoriously hard to embed directly in <video> tags due to CORS and expirable links.
           The most reliable way to show a "thumbnail" or preview is usually the iframe with /preview endpoint.
