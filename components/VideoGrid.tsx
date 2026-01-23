@@ -105,7 +105,7 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
               onClick={() => video && onStatusChange(video.id, isPosted ? 'approved' : 'posted')}
               className={`w-full font-medium text-sm transition-all flex items-center justify-center gap-2 border h-10 relative z-20
                 ${isPosted 
-                  ? 'bg-red-600 text-white border-red-500 shadow-[0_0_15px_rgba(220,38,38,0.3)]' 
+                  ? 'bg-blue-600 text-white border-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.3)]' 
                   : 'bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:border-zinc-700 hover:text-zinc-400 disabled:opacity-50 disabled:hover:border-zinc-800 disabled:hover:text-zinc-500'
                 }`}
             >
