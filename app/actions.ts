@@ -3,14 +3,21 @@
 import { supabase } from '@/utils/supabase';
 import { VideoItem } from '@/components/VideoGrid';
 
-export async function getVideosPaginated(offset: number, limit: number): Promise<VideoItem[]> {
-  console.log(`Fetching videos offset: ${offset}, limit: ${limit}`);
+export async function getVideosPaginated(offset: number, limit: number, showPosted: boolean = false): Promise<VideoItem[]> {
+  console.log(`Fetching videos offset: ${offset}, limit: ${limit}, showPosted: ${showPosted}`);
   
-  const { data, error } = await supabase
+  let query = supabase
     .from('videos')
     .select('*')
-    .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1);
+    .order('created_at', { ascending: false });
+
+  if (showPosted) {
+    query = query.eq('status', 'posted');
+  } else {
+    query = query.neq('status', 'posted');
+  }
+    
+  const { data, error } = await query.range(offset, offset + limit - 1);
 
   if (error) {
     console.error('Error fetching videos:', error);

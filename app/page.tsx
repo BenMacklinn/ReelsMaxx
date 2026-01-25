@@ -22,6 +22,9 @@ export default function Home() {
   const [isPending, startTransition] = useTransition();
   const [isLoadingMore, startLoadMoreTransition] = useTransition();
   
+  // View state
+  const [view, setView] = useState<'main' | 'posted'>('main');
+  
   // Pagination state
   const LIMIT = 6;
   const [offset, setOffset] = useState(0);
@@ -29,13 +32,20 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
-    // Initial load
-    loadMoreVideos(0);
   }, []);
 
-  const loadMoreVideos = (currentOffset: number) => {
+  // Reload videos when view changes
+  useEffect(() => {
+    if (!mounted) return;
+    setVideos([]);
+    setOffset(0);
+    setHasMore(true);
+    loadMoreVideos(0, view === 'posted');
+  }, [view, mounted]);
+
+  const loadMoreVideos = (currentOffset: number, isPostedView: boolean) => {
     startTransition(async () => {
-      const fetchedVideos = await getVideosPaginated(currentOffset, LIMIT);
+      const fetchedVideos = await getVideosPaginated(currentOffset, LIMIT, isPostedView);
       
       if (fetchedVideos.length < LIMIT) {
         setHasMore(false);
@@ -53,7 +63,7 @@ export default function Home() {
 
   const handleLoadMore = () => {
     startLoadMoreTransition(async () => {
-      const fetchedVideos = await getVideosPaginated(offset, LIMIT);
+      const fetchedVideos = await getVideosPaginated(offset, LIMIT, view === 'posted');
       
       if (fetchedVideos.length < LIMIT) {
         setHasMore(false);
@@ -88,8 +98,17 @@ export default function Home() {
       }
     });
 
-    // Optimistically update UI - add to top
-    setVideos(prev => [...newVideos, ...prev]);
+    // Optimistically update UI - add to top if in main view
+    if (view === 'main') {
+      setVideos(prev => [...newVideos, ...prev]);
+    } else {
+      // If adding while in posted view, switch to main view? Or just notify?
+      // Let's switch to main view to see them
+      setView('main');
+      // The useEffect will trigger and reload, so we might lose the optimistic update if we don't handle it carefully.
+      // But since we save to DB below, the reload will pick them up (mostly).
+      // Actually, standard behavior: just save them. If user switches, they appear.
+    }
     
     // Save to DB
     newVideos.forEach(v => {
@@ -110,7 +129,18 @@ export default function Home() {
   };
 
   const handleStatusChange = (id: string, newStatus: 'pending' | 'approved' | 'rejected' | 'posted') => {
-    setVideos(prev => prev.map((v) => (v.id === id ? { ...v, status: newStatus } : v)));
+    // If we are moving a video to 'posted' and we are in 'main' view, remove it.
+    // If we are moving a video FROM 'posted' (to approved/pending) and we are in 'posted' view, remove it.
+    
+    const shouldRemove = (view === 'main' && newStatus === 'posted') || 
+                         (view === 'posted' && newStatus !== 'posted');
+
+    if (shouldRemove) {
+      setVideos(prev => prev.filter(v => v.id !== id));
+    } else {
+      setVideos(prev => prev.map((v) => (v.id === id ? { ...v, status: newStatus } : v)));
+    }
+    
     updateVideo(id, { status: newStatus });
   };
 
@@ -127,11 +157,34 @@ export default function Home() {
       <nav className="border-b border-zinc-800 bg-zinc-950/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-4 md:py-0 md:h-20 flex flex-col md:flex-row items-center justify-between relative gap-4 md:gap-0">
           
-          {/* Left: Branding */}
+          {/* Left: Branding & View Switcher */}
           <div className="flex items-center justify-between w-full md:w-auto md:justify-start gap-4 md:gap-12 z-20">
             <div>
               <h1 className="text-xl md:text-2xl font-black tracking-tight text-white uppercase mb-1">ReelsMaxx</h1>
               <div className="h-1 w-12 bg-emerald-500"></div>
+            </div>
+
+            <div className="flex bg-zinc-900 border border-zinc-800 rounded-lg p-1">
+              <button
+                onClick={() => setView('main')}
+                className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-colors ${
+                  view === 'main' 
+                    ? 'bg-zinc-800 text-white shadow-sm' 
+                    : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                Pending
+              </button>
+              <button
+                onClick={() => setView('posted')}
+                className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-colors ${
+                  view === 'posted' 
+                    ? 'bg-blue-600 text-white shadow-sm' 
+                    : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                Posted
+              </button>
             </div>
           </div>
 

@@ -18,8 +18,9 @@ interface VideoGridProps {
 }
 
 export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, onStatusChange, onRemoveVideo }: VideoGridProps) {
-  // Get first 6 videos or create placeholders
-  const videoSlots = [0, 1, 2, 3, 4, 5].map(i => ({
+  // Ensure at least 6 slots, but grow if we have more videos
+  const totalSlots = Math.max(videos.length, 6);
+  const videoSlots = Array.from({ length: totalSlots }).map((_, i) => ({
     video: videos[i] || null,
     index: i + 1
   }));
@@ -29,20 +30,8 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
     const isPosted = video?.status === 'posted';
 
     return (
-    <div className="w-full md:w-1/2 xl:w-1/3 px-12 mb-6 xl:mb-0">
+    <div key={index} className="w-full md:w-1/2 xl:w-1/3 px-12 mb-12">
       <div className="h-full border border-zinc-800 bg-zinc-900/20 p-4 flex flex-col gap-4 hover:border-zinc-700 transition-colors relative">
-        {/* Blur Overlay for Posted Status (Whole Card) */}
-        {isPosted && (
-          <div className="absolute inset-0 backdrop-blur-md bg-zinc-900/10 z-30 flex items-center justify-center">
-            <button
-              onClick={() => onStatusChange(video!.id, 'approved')} // Revert to approved to "reveal"
-              className="px-6 py-2 bg-zinc-950/80 border border-zinc-500 text-white font-bold uppercase tracking-widest hover:bg-white hover:text-black hover:border-white transition-all pointer-events-auto"
-            >
-              Reveal
-            </button>
-          </div>
-        )}
-
         {/* Video Column */}
         <div className="w-full">
           {video ? (
@@ -126,20 +115,8 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
   };
 
   return (
-    <div className="flex flex-col gap-18 -mb-96 scale-80 origin-top pb-0">
-      {/* Row 1 */}
-      <div className="flex flex-wrap -mx-12 gap-y-12">
-        {renderVideoGroup(videoSlots[0].video, 1)}
-        {renderVideoGroup(videoSlots[1].video, 2)}
-        {renderVideoGroup(videoSlots[2].video, 3)}
-      </div>
-
-      {/* Row 2 */}
-      <div className="flex flex-wrap -mx-12 gap-y-12">
-        {renderVideoGroup(videoSlots[3].video, 4)}
-        {renderVideoGroup(videoSlots[4].video, 5)}
-        {renderVideoGroup(videoSlots[5].video, 6)}
-      </div>
+    <div className="flex flex-wrap -mx-12 -mb-96 scale-80 origin-top pb-0">
+      {videoSlots.map(slot => renderVideoGroup(slot.video, slot.index))}
     </div>
   );
 }
