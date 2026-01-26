@@ -1,4 +1,6 @@
+import React from 'react';
 import VideoCard from './VideoCard';
+import { notifyBen } from '@/app/actions';
 
 export interface VideoItem {
   id: string;
@@ -28,6 +30,7 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
   const renderVideoGroup = (video: VideoItem | null, index: number) => {
     const isApproved = video?.status === 'approved' || video?.status === 'posted';
     const isPosted = video?.status === 'posted';
+    const [notified, setNotified] = React.useState(false);
 
     return (
     <div key={index} className="w-full md:w-1/2 xl:w-1/3 px-12 mb-12">
@@ -106,6 +109,26 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
               ) : (
                 "POSTED"
               )}
+            </button>
+            <button
+              disabled={!video}
+              onClick={async () => {
+                if (!video) return;
+                const res = await notifyBen(video.caption || 'No caption', video.feedback || '');
+                if (res.success) {
+                  setNotified(true);
+                  alert('SMS sent to Ben!');
+                } else {
+                  alert('Failed to send SMS: ' + res.error);
+                }
+              }}
+              className={`w-full font-medium text-sm transition-all flex items-center justify-center gap-2 border h-10 relative z-20 
+                ${notified
+                  ? 'bg-red-600 text-white border-red-500 shadow-[0_0_15px_rgba(220,38,38,0.3)]'
+                  : 'bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:border-zinc-700 hover:text-zinc-400 disabled:opacity-50 disabled:hover:border-zinc-800 disabled:hover:text-zinc-500'
+                }`}
+            >
+              {notified ? 'NOTIFIED' : 'NOTIFY BEN'}
             </button>
           </div>
         </div>

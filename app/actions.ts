@@ -2,6 +2,34 @@
 
 import { supabase } from '@/utils/supabase';
 import { VideoItem } from '@/components/VideoGrid';
+import twilio from 'twilio';
+
+export async function notifyBen(caption: string, feedback: string) {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const fromNumber = process.env.TWILIO_PHONE_NUMBER;
+  const toNumber = '+16479236625'; // Ben's number
+
+  if (!accountSid || !authToken || !fromNumber) {
+    console.error('Twilio credentials missing');
+    return { success: false, error: 'Twilio credentials missing' };
+  }
+
+  const client = twilio(accountSid, authToken);
+
+  try {
+    const message = await client.messages.create({
+      body: `Update for video: "${caption}"\n\nFeedback: ${feedback || 'No feedback provided'}`,
+      from: fromNumber,
+      to: toNumber,
+    });
+    console.log('SMS sent:', message.sid);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error sending SMS:', error);
+    return { success: false, error: error.message };
+  }
+}
 
 export async function getVideosPaginated(offset: number, limit: number, showPosted: boolean = false): Promise<VideoItem[]> {
   console.log(`Fetching videos offset: ${offset}, limit: ${limit}, showPosted: ${showPosted}`);
