@@ -17,9 +17,10 @@ interface VideoGridProps {
   onFeedbackChange: (id: string, newFeedback: string) => void;
   onStatusChange: (id: string, newStatus: 'pending' | 'approved' | 'rejected' | 'posted') => void;
   onRemoveVideo: (id: string) => void;
+  isPostedView?: boolean;
 }
 
-export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, onStatusChange, onRemoveVideo }: VideoGridProps) {
+export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, onStatusChange, onRemoveVideo, isPostedView = false }: VideoGridProps) {
   // Ensure at least 6 slots, but grow if we have more videos
   const totalSlots = Math.max(videos.length, 6);
   const videoSlots = Array.from({ length: totalSlots }).map((_, i) => ({
@@ -110,22 +111,24 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
                 "POSTED"
               )}
             </button>
-            <button
-              disabled={!video}
-              onClick={async () => {
-                if (!video) return;
-                const res = await notifyBen(video.caption || 'No caption', video.feedback || '');
-                if (res.success) {
-                  setNotified(true);
-                  alert('SMS sent to Ben!');
-                } else {
-                  alert('Failed to send SMS: ' + res.error);
-                }
-              }}
-              className={`w-full font-medium text-sm transition-all flex items-center justify-center gap-2 border h-10 relative z-20 bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:border-zinc-700 hover:text-zinc-400 disabled:opacity-50 disabled:hover:border-zinc-800 disabled:hover:text-zinc-500`}
-            >
-              {notified ? 'NOTIFIED' : 'NOTIFY BEN'}
-            </button>
+            {!isPostedView && (
+              <button
+                disabled={!video}
+                onClick={async () => {
+                  if (!video) return;
+                  const res = await notifyBen(video.caption || 'No caption', video.feedback || '');
+                  if (res.success) {
+                    setNotified(true);
+                    alert('SMS sent to Ben!');
+                  } else {
+                    alert('Failed to send SMS: ' + res.error);
+                  }
+                }}
+                className={`w-full font-medium text-sm transition-all flex items-center justify-center gap-2 border h-10 relative z-20 bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:border-zinc-700 hover:text-zinc-400 disabled:opacity-50 disabled:hover:border-zinc-800 disabled:hover:text-zinc-500`}
+              >
+                {notified ? 'NOTIFIED' : 'NOTIFY BEN'}
+              </button>
+            )}
           </div>
         </div>
       </div>

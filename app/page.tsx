@@ -269,6 +269,7 @@ export default function Home() {
               onFeedbackChange={handleFeedbackChange}
               onStatusChange={handleStatusChange}
               onRemoveVideo={handleRemoveVideo}
+              isPostedView={view === 'posted'}
             />
         </section>
 
