@@ -11,29 +11,22 @@ export interface VideoItem {
   status: 'pending' | 'approved' | 'rejected' | 'posted';
 }
 
-interface VideoGridProps {
-  videos: VideoItem[];
+interface VideoGridItemProps {
+  video: VideoItem | null;
+  index: number;
   onCaptionChange: (id: string, newCaption: string) => void;
   onFeedbackChange: (id: string, newFeedback: string) => void;
   onStatusChange: (id: string, newStatus: 'pending' | 'approved' | 'rejected' | 'posted') => void;
   onRemoveVideo: (id: string) => void;
-  isPostedView?: boolean;
+  isPostedView: boolean;
 }
 
-export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, onStatusChange, onRemoveVideo, isPostedView = false }: VideoGridProps) {
-  // Ensure at least 6 slots, but grow if we have more videos
-  const totalSlots = Math.max(videos.length, 6);
-  const videoSlots = Array.from({ length: totalSlots }).map((_, i) => ({
-    video: videos[i] || null,
-    index: i + 1
-  }));
+const VideoGridItem = ({ video, index, onCaptionChange, onFeedbackChange, onStatusChange, onRemoveVideo, isPostedView }: VideoGridItemProps) => {
+  const isApproved = video?.status === 'approved' || video?.status === 'posted';
+  const isPosted = video?.status === 'posted';
+  const [notified, setNotified] = React.useState(false);
 
-  const renderVideoGroup = (video: VideoItem | null, index: number) => {
-    const isApproved = video?.status === 'approved' || video?.status === 'posted';
-    const isPosted = video?.status === 'posted';
-    const [notified, setNotified] = React.useState(false);
-
-    return (
+  return (
     <div key={index} className="w-full md:w-1/2 xl:w-1/3 px-12 mb-12">
       <div className="h-full border border-zinc-800 bg-zinc-900/20 p-4 flex flex-col gap-4 hover:border-zinc-700 transition-colors relative">
         {/* Video Column */}
@@ -134,11 +127,39 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
       </div>
     </div>
   );
-  };
+};
+
+interface VideoGridProps {
+  videos: VideoItem[];
+  onCaptionChange: (id: string, newCaption: string) => void;
+  onFeedbackChange: (id: string, newFeedback: string) => void;
+  onStatusChange: (id: string, newStatus: 'pending' | 'approved' | 'rejected' | 'posted') => void;
+  onRemoveVideo: (id: string) => void;
+  isPostedView?: boolean;
+}
+
+export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, onStatusChange, onRemoveVideo, isPostedView = false }: VideoGridProps) {
+  // Ensure at least 6 slots, but grow if we have more videos
+  const totalSlots = Math.max(videos.length, 6);
+  const videoSlots = Array.from({ length: totalSlots }).map((_, i) => ({
+    video: videos[i] || null,
+    index: i + 1
+  }));
 
   return (
     <div className="flex flex-wrap -mx-12 -mb-96 scale-80 origin-top pb-0">
-      {videoSlots.map(slot => renderVideoGroup(slot.video, slot.index))}
+      {videoSlots.map(slot => (
+        <VideoGridItem
+          key={slot.index}
+          video={slot.video}
+          index={slot.index}
+          onCaptionChange={onCaptionChange}
+          onFeedbackChange={onFeedbackChange}
+          onStatusChange={onStatusChange}
+          onRemoveVideo={onRemoveVideo}
+          isPostedView={isPostedView}
+        />
+      ))}
     </div>
   );
 }
