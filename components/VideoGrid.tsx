@@ -6,8 +6,7 @@ export interface VideoItem {
   id: string;
   fileId: string;
   originalUrl: string;
-  caption: string;
-  instagramCaption?: string;
+  caption: string; // Used for Instagram Caption
   ytShortsTitle?: string;
   feedback: string;
   status: 'pending' | 'approved' | 'rejected' | 'posted';
@@ -16,7 +15,6 @@ export interface VideoItem {
 interface VideoGridItemProps {
   video: VideoItem | null;
   index: number;
-  onCaptionChange: (id: string, newCaption: string) => void;
   onInstagramCaptionChange: (id: string, newCaption: string) => void;
   onYtShortsTitleChange: (id: string, newTitle: string) => void;
   onFeedbackChange: (id: string, newFeedback: string) => void;
@@ -25,7 +23,7 @@ interface VideoGridItemProps {
   isPostedView: boolean;
 }
 
-const VideoGridItem = ({ video, index, onCaptionChange, onInstagramCaptionChange, onYtShortsTitleChange, onFeedbackChange, onStatusChange, onRemoveVideo, isPostedView }: VideoGridItemProps) => {
+const VideoGridItem = ({ video, index, onInstagramCaptionChange, onYtShortsTitleChange, onFeedbackChange, onStatusChange, onRemoveVideo, isPostedView }: VideoGridItemProps) => {
   const isApproved = video?.status === 'approved' || video?.status === 'posted';
   const isPosted = video?.status === 'posted';
   const [notified, setNotified] = React.useState(false);
@@ -40,7 +38,7 @@ const VideoGridItem = ({ video, index, onCaptionChange, onInstagramCaptionChange
               <VideoCard
                 fileId={video.fileId}
                 originalUrl={video.originalUrl}
-                instagramCaption={video.instagramCaption || ''}
+                instagramCaption={video.caption}
                 ytShortsTitle={video.ytShortsTitle || ''}
                 index={index}
                 onInstagramCaptionChange={(val) => onInstagramCaptionChange(video.id, val)}
@@ -137,7 +135,6 @@ const VideoGridItem = ({ video, index, onCaptionChange, onInstagramCaptionChange
 
 interface VideoGridProps {
   videos: VideoItem[];
-  onCaptionChange: (id: string, newCaption: string) => void;
   onInstagramCaptionChange: (id: string, newCaption: string) => void;
   onYtShortsTitleChange: (id: string, newTitle: string) => void;
   onFeedbackChange: (id: string, newFeedback: string) => void;
@@ -146,7 +143,7 @@ interface VideoGridProps {
   isPostedView?: boolean;
 }
 
-export default function VideoGrid({ videos, onCaptionChange, onInstagramCaptionChange, onYtShortsTitleChange, onFeedbackChange, onStatusChange, onRemoveVideo, isPostedView = false }: VideoGridProps) {
+export default function VideoGrid({ videos, onInstagramCaptionChange, onYtShortsTitleChange, onFeedbackChange, onStatusChange, onRemoveVideo, isPostedView = false }: VideoGridProps) {
   // Ensure at least 6 slots, but grow if we have more videos
   const totalSlots = Math.max(videos.length, 6);
   const videoSlots = Array.from({ length: totalSlots }).map((_, i) => ({
@@ -161,7 +158,6 @@ export default function VideoGrid({ videos, onCaptionChange, onInstagramCaptionC
           key={slot.index}
           video={slot.video}
           index={slot.index}
-          onCaptionChange={onCaptionChange}
           onInstagramCaptionChange={onInstagramCaptionChange}
           onYtShortsTitleChange={onYtShortsTitleChange}
           onFeedbackChange={onFeedbackChange}

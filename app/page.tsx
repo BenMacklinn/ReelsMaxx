@@ -91,8 +91,7 @@ export default function Home() {
           id: `${fileId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           fileId,
           originalUrl: url,
-          caption: '',
-          instagramCaption: '',
+          caption: '', // Instagram Caption
           ytShortsTitle: '',
           feedback: '',
           status: 'pending',
@@ -120,14 +119,9 @@ export default function Home() {
     setInputLinks('');
   };
 
-  const handleCaptionChange = (id: string, newCaption: string) => {
+  const handleInstagramCaptionChange = (id: string, newCaption: string) => {
     setVideos(prev => prev.map((v) => (v.id === id ? { ...v, caption: newCaption } : v)));
     updateVideo(id, { caption: newCaption });
-  };
-
-  const handleInstagramCaptionChange = (id: string, newCaption: string) => {
-    setVideos(prev => prev.map((v) => (v.id === id ? { ...v, instagramCaption: newCaption } : v)));
-    updateVideo(id, { instagramCaption: newCaption });
   };
 
   const handleYtShortsTitleChange = (id: string, newTitle: string) => {
@@ -277,7 +271,6 @@ export default function Home() {
         <section className="mb-8">
             <VideoGrid 
               videos={videos} 
-              onCaptionChange={handleCaptionChange}
               onInstagramCaptionChange={handleInstagramCaptionChange}
               onYtShortsTitleChange={handleYtShortsTitleChange}
               onFeedbackChange={handleFeedbackChange}

@@ -56,8 +56,7 @@ export async function getVideosPaginated(offset: number, limit: number, showPost
     id: row.id,
     fileId: row.file_id,
     originalUrl: row.original_url,
-    caption: row.caption || '',
-    instagramCaption: row.instagram_caption || '',
+    caption: row.caption || '', // Instagram Caption
     ytShortsTitle: row.yt_shorts_title || '',
     feedback: row.feedback || '',
     status: row.status || 'pending',
@@ -84,8 +83,7 @@ export async function getVideos(dateKey: string): Promise<VideoItem[]> {
     id: row.id,
     fileId: row.file_id,
     originalUrl: row.original_url,
-    caption: row.caption || '',
-    instagramCaption: row.instagram_caption || '',
+    caption: row.caption || '', // Instagram Caption
     ytShortsTitle: row.yt_shorts_title || '',
     feedback: row.feedback || '',
     status: row.status || 'pending',
@@ -100,8 +98,7 @@ export async function addVideo(dateKey: string, video: VideoItem) {
     date_key: dateKey,
     file_id: video.fileId,
     original_url: video.originalUrl,
-    caption: video.caption,
-    instagram_caption: video.instagramCaption || '',
+    caption: video.caption, // Instagram Caption
     yt_shorts_title: video.ytShortsTitle || '',
     feedback: video.feedback,
     status: video.status,
@@ -124,8 +121,7 @@ export async function addVideo(dateKey: string, video: VideoItem) {
 export async function updateVideo(id: string, updates: Partial<VideoItem>) {
   // Convert camelCase to snake_case for DB
   const dbUpdates: any = {};
-  if (updates.caption !== undefined) dbUpdates.caption = updates.caption;
-  if (updates.instagramCaption !== undefined) dbUpdates.instagram_caption = updates.instagramCaption;
+  if (updates.caption !== undefined) dbUpdates.caption = updates.caption; // Instagram Caption
   if (updates.ytShortsTitle !== undefined) dbUpdates.yt_shorts_title = updates.ytShortsTitle;
   if (updates.feedback !== undefined) dbUpdates.feedback = updates.feedback;
   if (updates.status !== undefined) dbUpdates.status = updates.status;
