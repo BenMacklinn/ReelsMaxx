@@ -7,12 +7,14 @@ interface VideoCardProps {
   fileId: string;
   originalUrl: string;
   index: number;
-  caption: string;
-  onCaptionChange: (newCaption: string) => void;
+  instagramCaption: string;
+  ytShortsTitle: string;
+  onInstagramCaptionChange: (newCaption: string) => void;
+  onYtShortsTitleChange: (newTitle: string) => void;
   status?: string;
 }
 
-export default function VideoCard({ fileId, originalUrl, index, caption, onCaptionChange, status }: VideoCardProps) {
+export default function VideoCard({ fileId, originalUrl, index, instagramCaption, ytShortsTitle, onInstagramCaptionChange, onYtShortsTitleChange, status }: VideoCardProps) {
   const [error, setError] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -99,13 +101,32 @@ export default function VideoCard({ fileId, originalUrl, index, caption, onCapti
         </a>
       </div>
 
-      {/* Caption Input - Below the video */}
-      <textarea
-        value={caption}
-        onChange={(e) => onCaptionChange(e.target.value)}
-        className="w-full h-24 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-200 border border-zinc-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none placeholder-zinc-700 transition-colors resize-none"
-        placeholder="Enter caption..."
-      />
+      {/* Caption Inputs - Below the video */}
+      <div className="w-full flex flex-col gap-3">
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+            Instagram Caption
+          </label>
+          <textarea
+            value={instagramCaption}
+            onChange={(e) => onInstagramCaptionChange(e.target.value)}
+            className="w-full h-24 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-200 border border-zinc-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 outline-none placeholder-zinc-700 transition-colors resize-none"
+            placeholder="Enter Instagram caption..."
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+            YT Shorts Title
+          </label>
+          <textarea
+            value={ytShortsTitle}
+            onChange={(e) => onYtShortsTitleChange(e.target.value)}
+            className="w-full h-24 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-200 border border-zinc-800 focus:border-red-500 focus:ring-1 focus:ring-red-500/20 outline-none placeholder-zinc-700 transition-colors resize-none"
+            placeholder="Enter YouTube Shorts title..."
+          />
+        </div>
+      </div>
     </div>
   );
 }

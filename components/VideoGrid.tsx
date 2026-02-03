@@ -7,6 +7,8 @@ export interface VideoItem {
   fileId: string;
   originalUrl: string;
   caption: string;
+  instagramCaption?: string;
+  ytShortsTitle?: string;
   feedback: string;
   status: 'pending' | 'approved' | 'rejected' | 'posted';
 }
@@ -15,13 +17,15 @@ interface VideoGridItemProps {
   video: VideoItem | null;
   index: number;
   onCaptionChange: (id: string, newCaption: string) => void;
+  onInstagramCaptionChange: (id: string, newCaption: string) => void;
+  onYtShortsTitleChange: (id: string, newTitle: string) => void;
   onFeedbackChange: (id: string, newFeedback: string) => void;
   onStatusChange: (id: string, newStatus: 'pending' | 'approved' | 'rejected' | 'posted') => void;
   onRemoveVideo: (id: string) => void;
   isPostedView: boolean;
 }
 
-const VideoGridItem = ({ video, index, onCaptionChange, onFeedbackChange, onStatusChange, onRemoveVideo, isPostedView }: VideoGridItemProps) => {
+const VideoGridItem = ({ video, index, onCaptionChange, onInstagramCaptionChange, onYtShortsTitleChange, onFeedbackChange, onStatusChange, onRemoveVideo, isPostedView }: VideoGridItemProps) => {
   const isApproved = video?.status === 'approved' || video?.status === 'posted';
   const isPosted = video?.status === 'posted';
   const [notified, setNotified] = React.useState(false);
@@ -36,9 +40,11 @@ const VideoGridItem = ({ video, index, onCaptionChange, onFeedbackChange, onStat
               <VideoCard
                 fileId={video.fileId}
                 originalUrl={video.originalUrl}
-                caption={video.caption}
+                instagramCaption={video.instagramCaption || ''}
+                ytShortsTitle={video.ytShortsTitle || ''}
                 index={index}
-                onCaptionChange={(val) => onCaptionChange(video.id, val)}
+                onInstagramCaptionChange={(val) => onInstagramCaptionChange(video.id, val)}
+                onYtShortsTitleChange={(val) => onYtShortsTitleChange(video.id, val)}
                 status={video.status}
               />
               <button
@@ -132,13 +138,15 @@ const VideoGridItem = ({ video, index, onCaptionChange, onFeedbackChange, onStat
 interface VideoGridProps {
   videos: VideoItem[];
   onCaptionChange: (id: string, newCaption: string) => void;
+  onInstagramCaptionChange: (id: string, newCaption: string) => void;
+  onYtShortsTitleChange: (id: string, newTitle: string) => void;
   onFeedbackChange: (id: string, newFeedback: string) => void;
   onStatusChange: (id: string, newStatus: 'pending' | 'approved' | 'rejected' | 'posted') => void;
   onRemoveVideo: (id: string) => void;
   isPostedView?: boolean;
 }
 
-export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, onStatusChange, onRemoveVideo, isPostedView = false }: VideoGridProps) {
+export default function VideoGrid({ videos, onCaptionChange, onInstagramCaptionChange, onYtShortsTitleChange, onFeedbackChange, onStatusChange, onRemoveVideo, isPostedView = false }: VideoGridProps) {
   // Ensure at least 6 slots, but grow if we have more videos
   const totalSlots = Math.max(videos.length, 6);
   const videoSlots = Array.from({ length: totalSlots }).map((_, i) => ({
@@ -154,6 +162,8 @@ export default function VideoGrid({ videos, onCaptionChange, onFeedbackChange, o
           video={slot.video}
           index={slot.index}
           onCaptionChange={onCaptionChange}
+          onInstagramCaptionChange={onInstagramCaptionChange}
+          onYtShortsTitleChange={onYtShortsTitleChange}
           onFeedbackChange={onFeedbackChange}
           onStatusChange={onStatusChange}
           onRemoveVideo={onRemoveVideo}

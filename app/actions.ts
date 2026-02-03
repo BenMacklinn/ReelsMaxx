@@ -57,6 +57,8 @@ export async function getVideosPaginated(offset: number, limit: number, showPost
     fileId: row.file_id,
     originalUrl: row.original_url,
     caption: row.caption || '',
+    instagramCaption: row.instagram_caption || '',
+    ytShortsTitle: row.yt_shorts_title || '',
     feedback: row.feedback || '',
     status: row.status || 'pending',
   }));
@@ -83,6 +85,8 @@ export async function getVideos(dateKey: string): Promise<VideoItem[]> {
     fileId: row.file_id,
     originalUrl: row.original_url,
     caption: row.caption || '',
+    instagramCaption: row.instagram_caption || '',
+    ytShortsTitle: row.yt_shorts_title || '',
     feedback: row.feedback || '',
     status: row.status || 'pending',
   }));
@@ -97,6 +101,8 @@ export async function addVideo(dateKey: string, video: VideoItem) {
     file_id: video.fileId,
     original_url: video.originalUrl,
     caption: video.caption,
+    instagram_caption: video.instagramCaption || '',
+    yt_shorts_title: video.ytShortsTitle || '',
     feedback: video.feedback,
     status: video.status,
     created_at: new Date().toISOString(),
@@ -119,6 +125,8 @@ export async function updateVideo(id: string, updates: Partial<VideoItem>) {
   // Convert camelCase to snake_case for DB
   const dbUpdates: any = {};
   if (updates.caption !== undefined) dbUpdates.caption = updates.caption;
+  if (updates.instagramCaption !== undefined) dbUpdates.instagram_caption = updates.instagramCaption;
+  if (updates.ytShortsTitle !== undefined) dbUpdates.yt_shorts_title = updates.ytShortsTitle;
   if (updates.feedback !== undefined) dbUpdates.feedback = updates.feedback;
   if (updates.status !== undefined) dbUpdates.status = updates.status;
 
